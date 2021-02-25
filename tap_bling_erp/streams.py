@@ -59,22 +59,22 @@ class Orders(Stream):
         api_finish_time = datetime.strftime(api_finish_time,API_REQ_DATETIME_FORMAT)
         
         # get orders from API and iterate over results
-        for record in self.client.get_orders(api_start_time,api_finish_time):
-            
-            record = extract_last_updated(record['pedido'],API_RESP_DATETIME_FORMAT)
-            transformed_record = transformer.transform(record, stream_schema, stream_metadata)
+        for page, records in self.client.get_orders(api_start_time,api_finish_time):
+            for record in records:
+                record = extract_last_updated(record['pedido'],API_RESP_DATETIME_FORMAT)
+                transformed_record = transformer.transform(record, stream_schema, stream_metadata)
 
-            # as the transformed_record returns any datetime field as a str in the format of "%04Y-%m-%dT%H:%M:%S.%fZ", it's necessary to convert it to datetime for comparisons.
-            # replace method is used because data was only faked as if it was UTC 0 timezone, but no changes in datetime were applied, so we don't need to change it again
-            updated_at = datetime.strptime(
-                transformed_record[self.replication_key],
-                BOOKMARK_DATE_FORMAT)
-            updated_at = updated_at.replace(tzinfo=pytz.timezone(self.sao_paulo_tz_fixed(updated_at)))
+                # as the transformed_record returns any datetime field as a str in the format of "%04Y-%m-%dT%H:%M:%S.%fZ", it's necessary to convert it to datetime for comparisons.
+                # replace method is used because data was only faked as if it was UTC 0 timezone, but no changes in datetime were applied, so we don't need to change it again
+                updated_at = datetime.strptime(
+                    transformed_record[self.replication_key],
+                    BOOKMARK_DATE_FORMAT)
+                updated_at = updated_at.replace(tzinfo=pytz.timezone(self.sao_paulo_tz_fixed(updated_at)))
 
-            singer.write_record(self.tap_stream_id,transformed_record,time_extracted=extraction_time)
+                singer.write_record(self.tap_stream_id,transformed_record,time_extracted=extraction_time)
 
-            if updated_at > max_record_value:
-                max_record_value = updated_at
+                if updated_at > max_record_value:
+                    max_record_value = updated_at
 
         # As the API will return data where updated_at < HH:MM, use the next minute as the bookmark
         # Altough updated_at is always truncated at the minute level, does this manual truncation just to be sure future updates in the API won't break the code

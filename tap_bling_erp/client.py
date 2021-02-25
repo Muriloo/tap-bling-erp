@@ -11,7 +11,6 @@ class BlingERPClient():
 
 
     def get_orders(self,start_time,end_time):
-        api_data = []
 
         # define request parameters
         params = {
@@ -49,7 +48,7 @@ class BlingERPClient():
                 raise "Error parsing response. Key 'pedidos' not available in API response."
             
             LOGGER.info("Page requested: {}".format(page))
-            api_data.extend(return_dict['pedidos'])
+            
             page = page + 1
-        
-        return api_data
+
+            yield page, return_dict['pedidos']
