@@ -17,7 +17,7 @@ def extract_last_updated(record,API_RESP_DATETIME_FORMAT):
         max_date_str = datetime.strftime(max_date,API_RESP_DATETIME_FORMAT)
     
     else:
-        max_date_str = None
+        max_date_str = record['data'] + ' 00:00:00'
     
     record['dataAlteracao'] = max_date_str
 
