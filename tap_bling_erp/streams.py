@@ -116,7 +116,7 @@ class Invoices(Stream):
         api_finish_time = datetime.strftime(api_finish_time,API_REQ_DATETIME_FORMAT)
         
         # get invoices from API and iterate over results
-        for page, records in self.client.invoices(api_start_time,api_finish_time):
+        for page, records in self.client.get_invoices(api_start_time,api_finish_time):
             for record in records:
                 record = extract_last_updated(record['notafiscal'],API_RESP_DATETIME_FORMAT)
                 transformed_record = transformer.transform(record, stream_schema, stream_metadata)
