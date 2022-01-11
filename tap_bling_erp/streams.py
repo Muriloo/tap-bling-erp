@@ -118,7 +118,8 @@ class Invoices(Stream):
         # get invoices from API and iterate over results
         for page, records in self.client.get_invoices(api_start_time,api_finish_time):
             for record in records:
-                record = extract_last_updated(record['notafiscal'],API_RESP_DATETIME_FORMAT)
+                #record = extract_last_updated(record['notafiscal'],API_RESP_DATETIME_FORMAT)
+                record = record['notafiscal']
                 transformed_record = transformer.transform(record, stream_schema, stream_metadata)
 
                 # as the transformed_record returns any datetime field as a str in the format of "%04Y-%m-%dT%H:%M:%S.%fZ", it's necessary to convert it to datetime for comparisons.
