@@ -79,6 +79,9 @@ class Orders(Stream):
         # As the API will return data where updated_at < HH:MM, use the next minute as the bookmark
         # Altough updated_at is always truncated at the minute level, does this manual truncation just to be sure future updates in the API won't break the code
         max_record_value = max_record_value + timedelta(minutes=1)
+        api_finish_time = datetime.strptime(api_finish_time,API_REQ_DATETIME_FORMAT)
+        api_finish_time = api_finish_time.replace(tzinfo = pytz.timezone(self.sao_paulo_tz_fixed(api_finish_time)))
+        max_record_value = min(max_record_value,api_finish_time)
         max_record_value = datetime.strftime(
             max_record_value.replace(second=0),BOOKMARK_DATE_FORMAT)
         state = singer.write_bookmark(state, self.tap_stream_id, self.replication_key, max_record_value)
