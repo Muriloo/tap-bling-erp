@@ -91,7 +91,7 @@ class Orders(Stream):
 
 class Invoices(Stream):
     tap_stream_id = 'bling_invoices'
-    key_properties = ['id'] # What's the role of this field?
+    key_properties = ['id']
     replication_method = 'INCREMENTAL'
     valid_replication_keys = ['dataEmissao']
     replication_key = 'dataEmissao'
@@ -121,7 +121,6 @@ class Invoices(Stream):
         # get invoices from API and iterate over results
         for page, records in self.client.get_invoices(api_start_time,api_finish_time):
             for record in records:
-                #record = extract_last_updated(record['notafiscal'],API_RESP_DATETIME_FORMAT)
                 record = record['notafiscal']
                 transformed_record = transformer.transform(record, stream_schema, stream_metadata)
 
