@@ -1,6 +1,7 @@
 import requests
 import singer
 import json
+from time import sleep
 
 LOGGER = singer.get_logger()
 
@@ -60,6 +61,9 @@ class BlingERPClient():
             'filters': 'dataEmissao['+start_time+' TO '+end_time+']',
             'apikey':self.config['api_token']
         }
+        if self.config.get('invoice_extra_filters'):
+            params['filters'] += ';' + self.config.get('invoice_extra_filters')
+
         LOGGER.info("Request - Start Datetime: {0}, Finish Datetime: {1}".\
             format(start_time,end_time))
 
@@ -71,6 +75,8 @@ class BlingERPClient():
             LOGGER.info("Pages: {}".format(page))
             url = "/".join([self.config['api_url'],'v2','notasfiscais','page='+str(page),'json'])         
             resp = requests.get(url=url, params=params)
+            #TODO: replace this by singer rate limiting decorators
+            sleep(2)  # enforce rate limiting
             
             # if status code is not 200 raise errors
             if resp.status_code != 200:
